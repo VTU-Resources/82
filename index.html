@@ -42,6 +42,8 @@
             /* Use a heart emoji */
             content: '❤️';
             color: red;
+            /* --- OPTIMIZATION: Hint for hardware acceleration to prevent lag --- */
+            will-change: transform, opacity;
         }
 
         /* Keyframe animation for floating hearts */
@@ -345,7 +347,9 @@
                 heart.remove();
             }, (duration + 2) * 1000);
         }
-        setInterval(createHeart, 300); // Generate background hearts
+        // --- THIS IS THE FIX ---
+        // Changed from 300 to 1000 (1 second) to drastically reduce load and stop lag.
+        setInterval(createHeart, 1000); // Generate background hearts (Slower rate to prevent lag)
 
         
         // --- Welcome Modal Logic ---
@@ -536,4 +540,3 @@
     </script>
 </body>
 </html>
-
