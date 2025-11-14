@@ -141,6 +141,30 @@
             color: #ec4899; /* pink */
         }
 
+        /* --- NEW CSS FOR WIN ANIMATION --- */
+        .blast-heart {
+            position: absolute;
+            top: 50%; /* Start from center */
+            left: 50%;
+            font-size: 1.5rem; /* A bit smaller for a "pop" effect */
+            z-index: 100;
+            opacity: 0; /* Start invisible */
+            animation: burstAnimation 1.5s ease-out forwards;
+        }
+
+        @keyframes burstAnimation {
+            0% {
+                transform: translate(-50%, -50%) scale(0.2);
+                opacity: 1;
+            }
+            100% {
+                /* Use CSS variables set by JS */
+                transform: translate(var(--x), var(--y)) scale(1);
+                opacity: 0;
+            }
+        }
+        /* --- END OF NEW CSS --- */
+
     </style>
 </head>
 <!-- Added overflow-hidden to prevent scrollbars from the main layout -->
@@ -161,8 +185,8 @@
     </div>
 
     <!-- Main Content Area: Home -->
-    <!-- Added flex for centering, which was already present -->
-    <main id="home-screen" class="flex-grow flex flex-col items-center justify-center text-center p-6 relative z-10">
+    <!-- Changed justify-center to justify-start and added pt-20 to move content up -->
+    <main id="home-screen" class="flex-grow flex flex-col items-center justify-start text-center p-6 pt-20 relative z-10">
         <div class="bg-white/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl">
             <h1 class="text-4xl md:text-5xl font-bold text-pink-600 mb-4 cursive-font text-glow">
                 Happy Children's Day!
@@ -177,7 +201,8 @@
     </main>
     
     <!-- "For You" screen (hidden by default) -->
-    <main id="you-screen" class="flex-grow flex-col items-center justify-center text-center p-6 relative z-10 hidden">
+    <!-- Changed justify-center to justify-start and added pt-20 to move content up -->
+    <main id="you-screen" class="flex-grow flex-col items-center justify-start text-center p-6 pt-20 relative z-10 hidden">
          <div class="bg-white/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl max-w-md w-full">
             <h1 class="text-3xl md:text-4xl font-bold text-pink-600 mb-6 cursive-font text-glow">
                 A Note For You ❤️
@@ -192,7 +217,8 @@
     </main>
 
     <!-- "Game" screen (hidden by default) -->
-    <main id="game-screen" class="flex-grow flex-col items-center justify-center text-center p-6 relative z-10 hidden">
+    <!-- Changed justify-center to justify-start and added pt-20 to move content up -->
+    <main id="game-screen" class="flex-grow flex-col items-center justify-start text-center p-6 pt-20 relative z-10 hidden">
         <div class="bg-white/50 backdrop-blur-sm p-6 rounded-3xl shadow-xl max-w-md w-full">
             <h1 class="text-3xl md:text-4xl font-bold text-pink-600 mb-4 cursive-font text-glow">
                 Love XOX Game!
@@ -371,6 +397,31 @@
 
         // --- Game Logic (Modified for Bot) ---
         
+        // --- NEW: Win Animation Function ---
+        const triggerWinAnimation = () => {
+            const blastContainer = document.body; // Blast across the whole page
+            for (let i = 0; i < 40; i++) { // Create 40 hearts
+                const heart = document.createElement('div');
+                heart.classList.add('blast-heart');
+                heart.innerHTML = Math.random() > 0.5 ? '❤️' : '💖'; // Mix of hearts
+
+                // Random direction and distance
+                const randomX = (Math.random() - 0.5) * (window.innerWidth * 1.5);
+                const randomY = (Math.random() - 0.5) * (window.innerHeight * 1.5);
+
+                heart.style.setProperty('--x', randomX + 'px');
+                heart.style.setProperty('--y', randomY + 'px');
+
+                blastContainer.appendChild(heart);
+
+                // Remove heart after animation (1500ms = 1.5s)
+                setTimeout(() => {
+                    heart.remove();
+                }, 1500); // Must match animation duration
+            }
+        };
+        // --- END: Win Animation Function ---
+
         const handleResultValidation = () => {
             let roundWon = false;
             for (let i = 0; i < winningConditions.length; i++) {
@@ -391,6 +442,7 @@
                 if (currentPlayer === playerO) {
                     // Player (❤️) wins
                     gameStatus.textContent = "You are always winner forever My dear Nan muddina henthi nan papu devate kandama";
+                    triggerWinAnimation(); // <-- HERE IS THE NEW ANIMATION CALL
                 } else {
                     // Bot (💖) wins - this shouldn't happen with the easy bot
                     gameStatus.textContent = "Bot Wins! (Oops!)";
