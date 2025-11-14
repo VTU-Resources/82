@@ -42,6 +42,8 @@
             /* Use a heart emoji */
             content: '❤️';
             color: red;
+            /* --- OPTIMIZATION: Hint for hardware acceleration to prevent lag --- */
+            will-change: transform, opacity;
         }
 
         /* Keyframe animation for floating hearts */
@@ -192,7 +194,7 @@
                 Happy Children's Day!
             </h1>
             <p class="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">
-                To my "Kandama"
+                Papu Kandama
             </p>
             <p class="text-xl md:text-2xl text-gray-700 leading-relaxed max-w-md cursive-font font-medium">
                 "Nan Muddina henthi, nan papu devate, kandama"
@@ -345,7 +347,9 @@
                 heart.remove();
             }, (duration + 2) * 1000);
         }
-        setInterval(createHeart, 300); // Generate background hearts
+        // --- THIS IS THE FIX ---
+        // Changed from 300 to 1000 (1 second) to drastically reduce load and stop lag.
+        setInterval(createHeart, 1000); // Generate background hearts (Slower rate to prevent lag)
 
         
         // --- Welcome Modal Logic ---
