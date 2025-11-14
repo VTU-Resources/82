@@ -194,7 +194,7 @@
                 Happy Children's Day!
             </h1>
             <p class="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">
-                Papu Kandama
+                To my "Kandama"
             </p>
             <p class="text-xl md:text-2xl text-gray-700 leading-relaxed max-w-md cursive-font font-medium">
                 "Nan Muddina henthi, nan papu devate, kandama"
@@ -211,7 +211,7 @@
             </h1>
             <p id="love-note" class="text-xl md:text-2xl text-gray-700 min-h-[6rem] flex items-center justify-center cursive-font font-medium">
                 Click the button for a surprise!
-            </p>
+            </label>
             <button id="new-note-btn" class="mt-6 bg-pink-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform duration-200 hover:scale-105">
                 New Love Note
             </button>
@@ -280,9 +280,17 @@
         </div>
     </nav>
 
+    <!-- NEW: Added Audio Element -->
+    <audio id="bgm" loop autoplay muted preload="auto">
+        <!-- This is a royalty-free romantic piano track -->
+        <source src="https://cdn.pixabay.com/audio/2022/02/14/audio_206a4a6012.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
     <script>
         // --- Element Selections ---
         const heartContainer = document.getElementById('heart-container');
+        const bgm = document.getElementById('bgm'); // NEW: Get audio element
         
         // Screens
         const homeScreen = document.getElementById('home-screen');
@@ -332,6 +340,21 @@
         ];
 
 
+        // --- NEW: Vibration Helper Function ---
+        /**
+         * Triggers vibration on supported devices.
+         * @param {number | number[]} ms - A single duration or a pattern (e.g., [200, 100, 200])
+         */
+        function vibrate(ms) {
+            if ('vibrate' in navigator) {
+                try {
+                    navigator.vibrate(ms);
+                } catch (e) {
+                    console.warn("Vibration failed", e);
+                }
+            }
+        }
+
         // --- Background Heart Animation ---
         function createHeart() {
             const heart = document.createElement('div');
@@ -360,7 +383,21 @@
         };
 
         closeModalBtn.addEventListener('click', () => {
+            vibrate(50); // NEW: Vibrate on click
             welcomeModal.classList.remove('show');
+            
+            // NEW: Start and unmute music on first click
+            if (bgm) {
+                bgm.play().then(() => {
+                    bgm.muted = false;
+                }).catch(error => {
+                    console.warn("Audio autoplay was blocked, trying to unmute anyway.", error);
+                    // Even if play() is blocked, user interaction happened.
+                    bgm.muted = false;
+                    bgm.play(); // Try playing again
+                });
+            }
+
             // Hide it completely after transition
             setTimeout(() => {
                 welcomeModal.style.display = 'none';
@@ -387,13 +424,23 @@
             navItemToActivate.classList.add('active');
         }
 
-        navHome.addEventListener('click', () => switchScreen(homeScreen, navHome));
-        navYou.addEventListener('click', () => switchScreen(youScreen, navYou));
-        navGame.addEventListener('click', () => switchScreen(gameScreen, navGame));
+        navHome.addEventListener('click', () => {
+            vibrate(50); // NEW: Vibrate on click
+            switchScreen(homeScreen, navHome);
+        });
+        navYou.addEventListener('click', () => {
+            vibrate(50); // NEW: Vibrate on click
+            switchScreen(youScreen, navYou);
+        });
+        navGame.addEventListener('click', () => {
+            vibrate(50); // NEW: Vibrate on click
+            switchScreen(gameScreen, navGame);
+        });
 
 
         // --- "For You" Screen Logic ---
         newNoteBtn.addEventListener('click', () => {
+            vibrate(50); // NEW: Vibrate on click
             const randomIndex = Math.floor(Math.random() * loveNotes.length);
             loveNoteEl.textContent = loveNotes[randomIndex];
         });
@@ -447,6 +494,7 @@
                     // Player (❤️) wins
                     gameStatus.textContent = "You are always winner forever My dear Nan muddina henthi nan papu devate kandama";
                     triggerWinAnimation(); // <-- HERE IS THE NEW ANIMATION CALL
+                    vibrate([200, 100, 200]); // NEW: Vibrate on win
                 } else {
                     // Bot (💖) wins - this shouldn't happen with the easy bot
                     gameStatus.textContent = "Bot Wins! (Oops!)";
@@ -503,6 +551,8 @@
                 return;
             }
 
+            vibrate(50); // NEW: Vibrate on successful cell click
+
             // --- Player's Move ---
             gameState[clickedCellIndex] = playerO;
             clickedCell.textContent = playerO;
@@ -532,7 +582,12 @@
 
         // Add event listeners
         gameCells.forEach(cell => cell.addEventListener('click', handleCellClick));
-        restartGameBtn.addEventListener('click', handleRestartGame);
+        
+        // NEW: Added vibration to restart button
+        restartGameBtn.addEventListener('click', () => {
+            vibrate(50);
+            handleRestartGame();
+        });
         
         // Initial setup
         gameStatus.textContent = "Your Turn! ❤️";
@@ -540,4 +595,3 @@
     </script>
 </body>
 </html>
-
