@@ -6,18 +6,19 @@
     <title>A Special Wish for You!</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Use Inter font -->
+    <!-- Use Inter and Playwrite fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playwrite+BE+VLG:wght@100..400&display=swap" rel="stylesheet">
     <style>
         /* Custom styles */
+        html {
+            height: 100%; /* Ensure html takes full height */
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             /* Sweet theme gradient */
             background: linear-gradient(135deg, #ffdde1 0%, #ee9ca7 100%);
-            /* Ensure no scrollbars on body */
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            /* Tailwind classes on the <body> tag (h-screen, w-full, overflow-hidden) will handle sizing and overflow. */
         }
 
         /* Container for the hearts */
@@ -39,7 +40,7 @@
             opacity: 0;
             animation: floatUp 5s linear forwards;
             /* Use a heart emoji */
-            content: '❤️'; 
+            content: '❤️';
             color: red;
         }
 
@@ -99,10 +100,13 @@
             z-index: 50;
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
+            /* Ensure it's hidden initially */
+            pointer-events: none;
         }
         
         #welcome-modal.show {
             opacity: 1;
+            pointer-events: auto;
         }
 
         .modal-content {
@@ -118,33 +122,29 @@
 
         /* Game Screen Styles */
         #game-board {
-            width: 100%;
-            height: 70%;
-            max-width: 400px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 20px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .game-heart {
-            position: absolute;
-            font-size: 3rem;
-            cursor: pointer;
-            animation: throb 0.5s infinite alternate;
-            user-select: none;
-            -webkit-user-select: none; /* For Safari */
+            width: fit-content; /* Fit the grid cells */
         }
         
-        @keyframes throb {
-            from { transform: scale(1); }
-            to { transform: scale(1.2); }
+        .cell {
+            transition: background-color 0.2s;
+        }
+        
+        .cell:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Add color to the symbols */
+        .cell.o { /* Player ❤️ */
+            color: #ef4444; /* red */
+        }
+        .cell.x { /* Bot 💖 */
+            color: #ec4899; /* pink */
         }
 
     </style>
 </head>
-<body class="h-screen w-full flex flex-col">
+<!-- Added overflow-hidden to prevent scrollbars from the main layout -->
+<body class="h-screen w-full flex flex-col overflow-hidden">
 
     <!-- Heart Animation Container -->
     <div id="heart-container"></div>
@@ -161,6 +161,7 @@
     </div>
 
     <!-- Main Content Area: Home -->
+    <!-- Added flex for centering, which was already present -->
     <main id="home-screen" class="flex-grow flex flex-col items-center justify-center text-center p-6 relative z-10">
         <div class="bg-white/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl">
             <h1 class="text-4xl md:text-5xl font-bold text-pink-600 mb-4 cursive-font text-glow">
@@ -194,18 +195,31 @@
     <main id="game-screen" class="flex-grow flex-col items-center justify-center text-center p-6 relative z-10 hidden">
         <div class="bg-white/50 backdrop-blur-sm p-6 rounded-3xl shadow-xl max-w-md w-full">
             <h1 class="text-3xl md:text-4xl font-bold text-pink-600 mb-4 cursive-font text-glow">
-                Love Game!
+                Love XOX Game!
             </h1>
-            <p class="text-lg text-gray-700 mb-2">Tap the heart!</p>
-            <p class="text-xl font-bold text-gray-800 mb-4">Score: <span id="score">0</span></p>
-            <div id="game-board">
-                <!-- Game heart will be added by JS -->
+            <!-- Status Display -->
+            <p id="game-status" class="text-xl font-bold text-gray-800 mb-4 min-h-[3rem] flex items-center justify-center">Player ❤️'s Turn</p>
+            <!-- Game Board -->
+            <div id="game-board" class="grid grid-cols-3 gap-2 mx-auto">
+                <div class="cell w-20 h-20 md:w-24 md:h-24 bg-white/50 rounded-lg flex items-center justify-center text-4xl font-bold cursor-pointer" data-cell-index="0"></div>
+                <div class="cell w-20 h-20 md:w-24 md:h-24 bg-white/50 rounded-lg flex items-center justify-center text-4xl font-bold cursor-pointer" data-cell-index="1"></div>
+                <div class="cell w-20 h-20 md:w-24 md:h-24 bg-white/50 rounded-lg flex items-center justify-center text-4xl font-bold cursor-pointer" data-cell-index="2"></div>
+                <div class="cell w-20 h-20 md:w-24 md:h-24 bg-white/50 rounded-lg flex items-center justify-center text-4xl font-bold cursor-pointer" data-cell-index="3"></div>
+                <div class="cell w-20 h-20 md:w-24 md:h-24 bg-white/50 rounded-lg flex items-center justify-center text-4xl font-bold cursor-pointer" data-cell-index="4"></div>
+                <div class="cell w-20 h-20 md:w-24 md:h-24 bg-white/50 rounded-lg flex items-center justify-center text-4xl font-bold cursor-pointer" data-cell-index="5"></div>
+                <div class="cell w-20 h-20 md:w-24 md:h-24 bg-white/50 rounded-lg flex items-center justify-center text-4xl font-bold cursor-pointer" data-cell-index="6"></div>
+                <div class="cell w-20 h-20 md:w-24 md:h-24 bg-white/50 rounded-lg flex items-center justify-center text-4xl font-bold cursor-pointer" data-cell-index="7"></div>
+                <div class="cell w-20 h-20 md:w-24 md:h-24 bg-white/50 rounded-lg flex items-center justify-center text-4xl font-bold cursor-pointer" data-cell-index="8"></div>
             </div>
+            <!-- Restart Button -->
+            <button id="restart-game-btn" class="mt-6 bg-pink-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform duration-200 hover:scale-105">
+                Restart Game
+            </button>
         </div>
     </main>
 
 
-    <!-- Bottom Navigation Bar ("Down Bar Pro") -->
+    <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 left-0 w-full h-20 bottom-nav z-20">
         <div class="flex justify-around items-center h-full max-w-md mx-auto">
             <!-- Home Tab -->
@@ -219,7 +233,7 @@
             
             <!-- "You" Tab -->
             <button id="nav-you" class="nav-item flex flex-col items-center justify-center text-gray-600 w-1/3">
-                <!-- User Icon SVG (like the "You" tab in your image) -->
+                <!-- User Icon SVG -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                 </svg>
@@ -273,13 +287,25 @@
 
         // Game Screen
         const gameBoard = document.getElementById('game-board');
-        const scoreEl = document.getElementById('score');
-        let score = 0;
+        const gameStatus = document.getElementById('game-status');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const gameCells = document.querySelectorAll('.cell');
+        
+        const playerO = '❤️'; // Player (You)
+        const playerX = '💖'; // Bot
+        let currentPlayer = playerO;
+        let gameState = ["", "", "", "", "", "", "", "", ""]; // 9 empty strings
+        let gameActive = true;
+        
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]  // Diagonals
+        ];
 
 
         // --- Background Heart Animation ---
         function createHeart() {
-            // ... (existing code) ...
             const heart = document.createElement('div');
             heart.classList.add('heart');
             heart.style.left = Math.random() * 100 + 'vw';
@@ -343,39 +369,117 @@
         });
 
 
-        // --- Game Logic ---
-        function spawnGameHeart() {
-            // Remove old heart if it exists
-            const oldHeart = gameBoard.querySelector('.game-heart');
-            if (oldHeart) {
-                oldHeart.remove();
+        // --- Game Logic (Modified for Bot) ---
+        
+        const handleResultValidation = () => {
+            let roundWon = false;
+            for (let i = 0; i < winningConditions.length; i++) {
+                const winCondition = winningConditions[i];
+                let a = gameState[winCondition[0]];
+                let b = gameState[winCondition[1]];
+                let c = gameState[winCondition[2]];
+                if (a === '' || b === '' || c === '') {
+                    continue;
+                }
+                if (a === b && b === c) {
+                    roundWon = true;
+                    break;
+                }
             }
 
-            const gameHeart = document.createElement('div');
-            gameHeart.classList.add('game-heart');
-            gameHeart.innerHTML = '❤️';
+            if (roundWon) {
+                if (currentPlayer === playerO) {
+                    // Player (❤️) wins
+                    gameStatus.textContent = "You are always winner forever My dear Nan muddina henthi nan papu devate kandama";
+                } else {
+                    // Bot (💖) wins - this shouldn't happen with the easy bot
+                    gameStatus.textContent = "Bot Wins! (Oops!)";
+                }
+                gameActive = false;
+                return;
+            }
 
-            // Random position within the board
-            const boardRect = gameBoard.getBoundingClientRect();
-            const heartSize = 48; // approx 3rem
-            const randomTop = Math.random() * (boardRect.height - heartSize);
-            const randomLeft = Math.random() * (boardRect.width - heartSize);
+            let roundDraw = !gameState.includes("");
+            if (roundDraw) {
+                gameStatus.textContent = "It's a Draw!";
+                gameActive = false;
+                return;
+            }
 
-            gameHeart.style.top = `${randomTop}px`;
-            gameHeart.style.left = `${randomLeft}px`;
+            // If no win or draw, change player
+            handlePlayerChange();
+        };
 
-            // Click event
-            gameHeart.addEventListener('click', () => {
-                score++;
-                scoreEl.textContent = score;
-                spawnGameHeart(); // Spawn a new one
+        const handlePlayerChange = () => {
+            currentPlayer = (currentPlayer === playerO) ? playerX : playerO;
+            if (currentPlayer === playerO) {
+                gameStatus.textContent = "Your Turn! ❤️";
+            } else {
+                gameStatus.textContent = "Bot's Turn... 💖";
+            }
+        };
+
+        // --- Bot's Move (Very Easy) ---
+        const botMove = () => {
+            if (!gameActive) return; // Don't move if game is over
+
+            // "Easy" bot: just finds the first empty cell and plays there.
+            // This is very predictable and easy to beat.
+            const emptyCellIndex = gameState.indexOf(""); 
+
+            if (emptyCellIndex === -1) return; // No moves left
+
+            // Make the bot's move
+            gameState[emptyCellIndex] = playerX;
+            gameCells[emptyCellIndex].textContent = playerX;
+            gameCells[emptyCellIndex].classList.add('x');
+
+            // Check if bot won and switch back to player
+            handleResultValidation();
+        };
+
+        const handleCellClick = (e) => {
+            const clickedCell = e.target;
+            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
+
+            // Check if cell is invalid OR game is over OR it's not the player's turn
+            if (gameState[clickedCellIndex] !== "" || !gameActive || currentPlayer !== playerO) {
+                return;
+            }
+
+            // --- Player's Move ---
+            gameState[clickedCellIndex] = playerO;
+            clickedCell.textContent = playerO;
+            clickedCell.classList.add('o');
+
+            // Check if player won
+            handleResultValidation();
+
+            // --- If game is still active, trigger Bot's turn ---
+            if (gameActive) {
+                gameStatus.textContent = "Bot is thinking...";
+                // Short delay to make it feel like the bot is "thinking"
+                setTimeout(botMove, 500);
+            }
+        };
+
+        const handleRestartGame = () => {
+            gameActive = true;
+            currentPlayer = playerO; // Player always starts
+            gameState = ["", "", "", "", "", "", "", "", ""];
+            gameStatus.textContent = "Your Turn! ❤️"; // Updated start message
+            gameCells.forEach(cell => {
+                cell.textContent = "";
+                cell.classList.remove('o', 'x');
             });
+        };
 
-            gameBoard.appendChild(gameHeart);
-        }
-
-        // Start the game
-        spawnGameHeart();
+        // Add event listeners
+        gameCells.forEach(cell => cell.addEventListener('click', handleCellClick));
+        restartGameBtn.addEventListener('click', handleRestartGame);
+        
+        // Initial setup
+        gameStatus.textContent = "Your Turn! ❤️";
 
     </script>
 </body>
