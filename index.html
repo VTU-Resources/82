@@ -14,8 +14,10 @@
             font-family: 'Inter', sans-serif;
             /* Sweet theme gradient */
             background: linear-gradient(135deg, #ffdde1 0%, #ee9ca7 100%);
-            /* Ensure no scrollbars */
+            /* Ensure no scrollbars on body */
             overflow: hidden;
+            height: 100vh;
+            width: 100vw;
         }
 
         /* Container for the hearts */
@@ -72,7 +74,7 @@
 
         /* Custom font for the greeting */
         .cursive-font {
-            font-family: 'Playwrite BE VLG', cursive;
+            font-family: 'Playwrite BE+VLG', cursive;
         }
 
         /* Style for the bottom nav bar */
@@ -90,6 +92,56 @@
         .nav-item.active span {
             color: #ec4899;
         }
+        
+        /* Welcome Modal Styles */
+        #welcome-modal {
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        #welcome-modal.show {
+            opacity: 1;
+        }
+
+        .modal-content {
+            transform: scale(0.7);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); /* "Blast" effect */
+        }
+
+        #welcome-modal.show .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        /* Game Screen Styles */
+        #game-board {
+            width: 100%;
+            height: 70%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-heart {
+            position: absolute;
+            font-size: 3rem;
+            cursor: pointer;
+            animation: throb 0.5s infinite alternate;
+            user-select: none;
+            -webkit-user-select: none; /* For Safari */
+        }
+        
+        @keyframes throb {
+            from { transform: scale(1); }
+            to { transform: scale(1.2); }
+        }
+
     </style>
 </head>
 <body class="h-screen w-full flex flex-col">
@@ -97,7 +149,18 @@
     <!-- Heart Animation Container -->
     <div id="heart-container"></div>
 
-    <!-- Main Content Area -->
+    <!-- Welcome "Blast" Modal -->
+    <div id="welcome-modal" class="fixed inset-0 w-full h-full flex items-center justify-center p-4">
+        <div class="modal-content bg-gradient-to-r from-pink-400 to-red-400 p-8 rounded-3xl shadow-2xl text-white text-center max-w-sm w-full">
+            <h2 class="text-3xl font-bold mb-4 cursive-font text-glow">Welcome!</h2>
+            <p class="text-lg mb-6">A special surprise is waiting for you, my Kandama! ❤️</p>
+            <button id="close-modal-btn" class="bg-white text-pink-500 font-bold py-2 px-6 rounded-full shadow-lg transition-transform duration-200 hover:scale-105">
+                Click Me
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Area: Home -->
     <main id="home-screen" class="flex-grow flex flex-col items-center justify-center text-center p-6 relative z-10">
         <div class="bg-white/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl">
             <h1 class="text-4xl md:text-5xl font-bold text-pink-600 mb-4 cursive-font text-glow">
@@ -114,21 +177,39 @@
     
     <!-- "For You" screen (hidden by default) -->
     <main id="you-screen" class="flex-grow flex-col items-center justify-center text-center p-6 relative z-10 hidden">
-         <div class="bg-white/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl">
-            <h1 class="text-4xl md:text-5xl font-bold text-pink-600 mb-4 cursive-font text-glow">
-                Always My Baby ❤️
+         <div class="bg-white/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl max-w-md w-full">
+            <h1 class="text-3xl md:text-4xl font-bold text-pink-600 mb-6 cursive-font text-glow">
+                A Note For You ❤️
             </h1>
-            <p class="text-xl md:text-2xl text-gray-700">
-                You are my precious one.
+            <p id="love-note" class="text-xl md:text-2xl text-gray-700 min-h-[6rem] flex items-center justify-center cursive-font font-medium">
+                Click the button for a surprise!
             </p>
+            <button id="new-note-btn" class="mt-6 bg-pink-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform duration-200 hover:scale-105">
+                New Love Note
+            </button>
         </div>
     </main>
+
+    <!-- "Game" screen (hidden by default) -->
+    <main id="game-screen" class="flex-grow flex-col items-center justify-center text-center p-6 relative z-10 hidden">
+        <div class="bg-white/50 backdrop-blur-sm p-6 rounded-3xl shadow-xl max-w-md w-full">
+            <h1 class="text-3xl md:text-4xl font-bold text-pink-600 mb-4 cursive-font text-glow">
+                Love Game!
+            </h1>
+            <p class="text-lg text-gray-700 mb-2">Tap the heart!</p>
+            <p class="text-xl font-bold text-gray-800 mb-4">Score: <span id="score">0</span></p>
+            <div id="game-board">
+                <!-- Game heart will be added by JS -->
+            </div>
+        </div>
+    </main>
+
 
     <!-- Bottom Navigation Bar ("Down Bar Pro") -->
     <nav class="fixed bottom-0 left-0 w-full h-20 bottom-nav z-20">
         <div class="flex justify-around items-center h-full max-w-md mx-auto">
             <!-- Home Tab -->
-            <button id="nav-home" class="nav-item active flex flex-col items-center justify-center text-gray-600">
+            <button id="nav-home" class="nav-item active flex flex-col items-center justify-center text-gray-600 w-1/3">
                 <!-- Home Icon SVG -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
@@ -137,75 +218,164 @@
             </button>
             
             <!-- "You" Tab -->
-            <button id="nav-you" class="nav-item flex flex-col items-center justify-center text-gray-600">
+            <button id="nav-you" class="nav-item flex flex-col items-center justify-center text-gray-600 w-1/3">
                 <!-- User Icon SVG (like the "You" tab in your image) -->
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                 </svg>
                 <span class="text-xs font-medium mt-1">For You</span>
             </button>
+
+            <!-- "Game" Tab -->
+            <button id="nav-game" class="nav-item flex flex-col items-center justify-center text-gray-600 w-1/3">
+                <!-- Game Icon SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9H5v2h2V9zm8 0h-2v2h2V9zm-4 4h-2v2h2v-2z" clip-rule="evenodd" />
+                    <path d="M15.5 10a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2a.5.5 0 01.5-.5zM4.5 10a.5.5 0 01.5.5v2a.5.5 0 01-1 0v-2a.5.5 0 01.5-.5z" />
+                </svg>
+                <span class="text-xs font-medium mt-1">Game</span>
+            </button>
         </div>
     </nav>
 
     <script>
+        // --- Element Selections ---
         const heartContainer = document.getElementById('heart-container');
+        
+        // Screens
         const homeScreen = document.getElementById('home-screen');
         const youScreen = document.getElementById('you-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const allScreens = [homeScreen, youScreen, gameScreen];
+
+        // Nav Buttons
         const navHome = document.getElementById('nav-home');
         const navYou = document.getElementById('nav-you');
+        const navGame = document.getElementById('nav-game');
+        const allNavItems = [navHome, navYou, navGame];
 
-        // Function to create a single heart
+        // Modal
+        const welcomeModal = document.getElementById('welcome-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+
+        // "For You" Screen
+        const loveNoteEl = document.getElementById('love-note');
+        const newNoteBtn = document.getElementById('new-note-btn');
+        const loveNotes = [
+            "You are my sunshine!",
+            "My favorite person in the world ❤️",
+            "Always my 'papu devate'!",
+            "Sending you all my love!",
+            "You make every day brighter!",
+            "My 'Muddina henthi'!",
+            "Just thinking about you..."
+        ];
+
+        // Game Screen
+        const gameBoard = document.getElementById('game-board');
+        const scoreEl = document.getElementById('score');
+        let score = 0;
+
+
+        // --- Background Heart Animation ---
         function createHeart() {
+            // ... (existing code) ...
             const heart = document.createElement('div');
             heart.classList.add('heart');
-            
-            // Set random horizontal position
             heart.style.left = Math.random() * 100 + 'vw';
-            
-            // Set random animation duration for varied speed
-            const duration = Math.random() * 3 + 4; // Between 4 and 7 seconds
+            const duration = Math.random() * 3 + 4;
             heart.style.animationDuration = duration + 's';
-            
-            // Set random delay
             heart.style.animationDelay = Math.random() * 2 + 's';
-
-            // Set heart content
             heart.innerHTML = '❤️';
-            
-            // Set random size
-            heart.style.fontSize = (Math.random() * 1.5 + 1) + 'rem'; // Between 1rem and 2.5rem
-
+            heart.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
             heartContainer.appendChild(heart);
-
-            // Remove the heart after the animation finishes
             setTimeout(() => {
                 heart.remove();
-            }, (duration + 2) * 1000); // Remove after duration + delay
+            }, (duration + 2) * 1000);
+        }
+        setInterval(createHeart, 300); // Generate background hearts
+
+        
+        // --- Welcome Modal Logic ---
+        window.onload = () => {
+            setTimeout(() => { // Show after a short delay
+                welcomeModal.classList.add('show');
+            }, 300);
+        };
+
+        closeModalBtn.addEventListener('click', () => {
+            welcomeModal.classList.remove('show');
+            // Hide it completely after transition
+            setTimeout(() => {
+                welcomeModal.style.display = 'none';
+            }, 300);
+        });
+
+
+        // --- Navigation Logic ---
+        function switchScreen(screenToShow, navItemToActivate) {
+            // Hide all screens
+            allScreens.forEach(screen => {
+                screen.classList.add('hidden');
+                screen.classList.remove('flex');
+            });
+            // Deactivate all nav items
+            allNavItems.forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Show the correct screen
+            screenToShow.classList.remove('hidden');
+            screenToShow.classList.add('flex');
+            // Activate the correct nav item
+            navItemToActivate.classList.add('active');
         }
 
-        // Generate hearts continuously
-        setInterval(createHeart, 300); // Create a new heart every 300ms
+        navHome.addEventListener('click', () => switchScreen(homeScreen, navHome));
+        navYou.addEventListener('click', () => switchScreen(youScreen, navYou));
+        navGame.addEventListener('click', () => switchScreen(gameScreen, navGame));
 
-        // Navigation logic
-        navHome.addEventListener('click', () => {
-            homeScreen.classList.remove('hidden');
-            homeScreen.classList.add('flex');
-            youScreen.classList.add('hidden');
-            youScreen.classList.remove('flex');
-            
-            navHome.classList.add('active');
-            navYou.classList.remove('active');
+
+        // --- "For You" Screen Logic ---
+        newNoteBtn.addEventListener('click', () => {
+            const randomIndex = Math.floor(Math.random() * loveNotes.length);
+            loveNoteEl.textContent = loveNotes[randomIndex];
         });
 
-        navYou.addEventListener('click', () => {
-            homeScreen.classList.add('hidden');
-            homeScreen.classList.remove('flex');
-            youScreen.classList.remove('hidden');
-            youScreen.classList.add('flex');
-            
-            navHome.classList.remove('active');
-            navYou.classList.add('active');
-        });
+
+        // --- Game Logic ---
+        function spawnGameHeart() {
+            // Remove old heart if it exists
+            const oldHeart = gameBoard.querySelector('.game-heart');
+            if (oldHeart) {
+                oldHeart.remove();
+            }
+
+            const gameHeart = document.createElement('div');
+            gameHeart.classList.add('game-heart');
+            gameHeart.innerHTML = '❤️';
+
+            // Random position within the board
+            const boardRect = gameBoard.getBoundingClientRect();
+            const heartSize = 48; // approx 3rem
+            const randomTop = Math.random() * (boardRect.height - heartSize);
+            const randomLeft = Math.random() * (boardRect.width - heartSize);
+
+            gameHeart.style.top = `${randomTop}px`;
+            gameHeart.style.left = `${randomLeft}px`;
+
+            // Click event
+            gameHeart.addEventListener('click', () => {
+                score++;
+                scoreEl.textContent = score;
+                spawnGameHeart(); // Spawn a new one
+            });
+
+            gameBoard.appendChild(gameHeart);
+        }
+
+        // Start the game
+        spawnGameHeart();
 
     </script>
 </body>
