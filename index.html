@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Wish for You!</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playwrite+BE+VLG:wght@100..400&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Sweet theme gradient */
+            background: linear-gradient(135deg, #ffdde1 0%, #ee9ca7 100%);
+            /* Ensure no scrollbars */
+            overflow: hidden;
+        }
+
+        /* Container for the hearts */
+        #heart-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        /* Individual heart style */
+        .heart {
+            position: absolute;
+            bottom: -50px; /* Start from below the screen */
+            font-size: 2rem; /* Size of the heart emoji */
+            opacity: 0;
+            animation: floatUp 5s linear forwards;
+            /* Use a heart emoji */
+            content: '❤️'; 
+            color: red;
+        }
+
+        /* Keyframe animation for floating hearts */
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0);
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh); /* Float all the way to the top */
+                opacity: 0;
+            }
+        }
+
+        /* Animation for the text */
+        .text-glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ffafcc, 0 0 40px #ffafcc;
+            }
+            to {
+                text-shadow: 0 0 20px #fff, 0 0 30px #ffc8dd, 0 0 40px #ffc8dd, 0 0 50px #ffc8dd;
+            }
+        }
+
+        /* Custom font for the greeting */
+        .cursive-font {
+            font-family: 'Playwrite BE VLG', cursive;
+        }
+
+        /* Style for the bottom nav bar */
+        .bottom-nav {
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(229, 231, 235, 0.7);
+        }
+
+        /* Active tab style */
+        .nav-item.active svg {
+            color: #ec4899; /* Pink color */
+        }
+        .nav-item.active span {
+            color: #ec4899;
+        }
+    </style>
+</head>
+<body class="h-screen w-full flex flex-col">
+
+    <!-- Heart Animation Container -->
+    <div id="heart-container"></div>
+
+    <!-- Main Content Area -->
+    <main id="home-screen" class="flex-grow flex flex-col items-center justify-center text-center p-6 relative z-10">
+        <div class="bg-white/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl">
+            <h1 class="text-4xl md:text-5xl font-bold text-pink-600 mb-4 cursive-font text-glow">
+                Happy Children's Day!
+            </h1>
+            <p class="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">
+                To my "Kandama"
+            </p>
+            <p class="text-xl md:text-2xl text-gray-700 leading-relaxed max-w-md cursive-font font-medium">
+                "Nan Muddina henthi, nan papu devate, kandama"
+            </p>
+        </div>
+    </main>
+    
+    <!-- "For You" screen (hidden by default) -->
+    <main id="you-screen" class="flex-grow flex-col items-center justify-center text-center p-6 relative z-10 hidden">
+         <div class="bg-white/50 backdrop-blur-sm p-8 rounded-3xl shadow-xl">
+            <h1 class="text-4xl md:text-5xl font-bold text-pink-600 mb-4 cursive-font text-glow">
+                Always My Baby ❤️
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-700">
+                You are my precious one.
+            </p>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation Bar ("Down Bar Pro") -->
+    <nav class="fixed bottom-0 left-0 w-full h-20 bottom-nav z-20">
+        <div class="flex justify-around items-center h-full max-w-md mx-auto">
+            <!-- Home Tab -->
+            <button id="nav-home" class="nav-item active flex flex-col items-center justify-center text-gray-600">
+                <!-- Home Icon SVG -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                </svg>
+                <span class="text-xs font-medium mt-1">Home</span>
+            </button>
+            
+            <!-- "You" Tab -->
+            <button id="nav-you" class="nav-item flex flex-col items-center justify-center text-gray-600">
+                <!-- User Icon SVG (like the "You" tab in your image) -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-xs font-medium mt-1">For You</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        const heartContainer = document.getElementById('heart-container');
+        const homeScreen = document.getElementById('home-screen');
+        const youScreen = document.getElementById('you-screen');
+        const navHome = document.getElementById('nav-home');
+        const navYou = document.getElementById('nav-you');
+
+        // Function to create a single heart
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            
+            // Set random horizontal position
+            heart.style.left = Math.random() * 100 + 'vw';
+            
+            // Set random animation duration for varied speed
+            const duration = Math.random() * 3 + 4; // Between 4 and 7 seconds
+            heart.style.animationDuration = duration + 's';
+            
+            // Set random delay
+            heart.style.animationDelay = Math.random() * 2 + 's';
+
+            // Set heart content
+            heart.innerHTML = '❤️';
+            
+            // Set random size
+            heart.style.fontSize = (Math.random() * 1.5 + 1) + 'rem'; // Between 1rem and 2.5rem
+
+            heartContainer.appendChild(heart);
+
+            // Remove the heart after the animation finishes
+            setTimeout(() => {
+                heart.remove();
+            }, (duration + 2) * 1000); // Remove after duration + delay
+        }
+
+        // Generate hearts continuously
+        setInterval(createHeart, 300); // Create a new heart every 300ms
+
+        // Navigation logic
+        navHome.addEventListener('click', () => {
+            homeScreen.classList.remove('hidden');
+            homeScreen.classList.add('flex');
+            youScreen.classList.add('hidden');
+            youScreen.classList.remove('flex');
+            
+            navHome.classList.add('active');
+            navYou.classList.remove('active');
+        });
+
+        navYou.addEventListener('click', () => {
+            homeScreen.classList.add('hidden');
+            homeScreen.classList.remove('flex');
+            youScreen.classList.remove('hidden');
+            youScreen.classList.add('flex');
+            
+            navHome.classList.remove('active');
+            navYou.classList.add('active');
+        });
+
+    </script>
+</body>
+</html>
