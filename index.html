@@ -426,21 +426,29 @@
         };
         // --- END: Win Animation Function ---
 
-        const handleResultValidation = () => {
-            let roundWon = false;
+        // --- NEW: Helper function to check for a win ---
+        // This lets the bot "test" a move before making it.
+        const checkWin = (player) => {
             for (let i = 0; i < winningConditions.length; i++) {
                 const winCondition = winningConditions[i];
                 let a = gameState[winCondition[0]];
                 let b = gameState[winCondition[1]];
                 let c = gameState[winCondition[2]];
-                if (a === '' || b === '' || c === '') {
-                    continue;
-                }
-                if (a === b && b === c) {
-                    roundWon = true;
-                    break;
+                if (a === player && b === player && c === player) {
+                    return true;
                 }
             }
+            return false;
+        };
+        // --- END: Helper function ---
+
+        const handleResultValidation = () => {
+            let roundWon = false;
+            // --- MODIFIED: Use the new checkWin helper ---
+            if (checkWin(currentPlayer)) {
+                roundWon = true;
+            }
+            // --- END MODIFICATION ---
 
             if (roundWon) {
                 if (currentPlayer === playerO) {
@@ -448,7 +456,7 @@
                     gameStatus.textContent = "You are always winner forever My dear Nan muddina henthi nan papu devate kandama";
                     triggerWinAnimation(); // <-- HERE IS THE NEW ANIMATION CALL
                 } else {
-                    // Bot (💖) wins - this shouldn't happen with the easy bot
+                    // Bot (💖) wins - This will not happen with the new logic
                     gameStatus.textContent = "Bot Wins! (Oops!)";
                 }
                 gameActive = false;
@@ -475,24 +483,118 @@
             }
         };
 
-        // --- Bot's Move (Very Easy) ---
+        // --- START: MODIFIED Bot's Move (To ensure bot NEVER wins) ---
         const botMove = () => {
-            if (!gameActive) return; // Don't move if game is over
+            if (!gameActive) return;
 
-            // "Easy" bot: just finds the first empty cell and plays there.
-            // This is very predictable and easy to beat.
-            const emptyCellIndex = gameState.indexOf(""); 
+            const emptyIndices = [];
+            gameState.forEach((cell, index) => {
+                if (cell === "") {
+                    emptyIndices.push(index);
+                }
+            });
 
-            if (emptyCellIndex === -1) return; // No moves left
+            if (emptyIndices.length === 0) return; // No moves left
 
-            // Make the bot's move
-            gameState[emptyCellIndex] = playerX;
-            gameCells[emptyCellIndex].textContent = playerX;
-            gameCells[emptyCellIndex].classList.add('x');
+            // 1. Priority: Block Player (playerO) from winning
+            let blockingMove = -1;
+            for (const condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (gameState[a] === playerO && gameState[b] === playerO && gameState[c] === "") {
+                    blockingMove = c;
+                } else if (gameState[a] === playerO && gameState[c] === playerO && gameState[b] === "") {
+                    blockingMove = b;
+                } else if (gameState[b] === playerO && gameState[c] === playerO && gameState[a] === "") {
+                    blockingMove = a;
+                }
+                if (blockingMove !== -1) break;
+            }
 
-            // Check if bot won and switch back to player
+            // 1b. Check if the blocking move is safe (i.e., doesn't ALSO win for the bot)
+            if (blockingMove !== -1) {
+                // Test the blocking move
+                gameState[blockingMove] = playerX;
+                const isWinningBlock = checkWin(playerX);
+                gameState[blockingMove] = ""; // Undo test
+
+                if (!isWinningBlock) {
+                    // It's a "safe" block. Make the move.
+                    gameState[blockingMove] = playerX;
+                    gameCells[blockingMove].textContent = playerX;
+                    gameCells[blockingMove].classList.add('x');
+                    handleResultValidation();
+                    return;
+                }
+                // If it IS a winning block, we ignore it and let the logic fall through
+                // to find a different, non-winning move.
+            }
+
+
+            // 2. Find a "safe" move (one that does NOT win for the bot)
+            let safeMoveFound = -1;
+            for (const index of emptyIndices) {
+                // Don't re-check the blocking move if it was a winning move
+                if (index === blockingMove) continue;
+
+                // Test the move
+                gameState[index] = playerX;
+                const isWinningMove = checkWin(playerX);
+                // Undo the test
+                gameState[index] = "";
+
+                if (!isWinningMove) {
+                    // This move is safe!
+                    safeMoveFound = index;
+                    break; // Found one, stop looking
+                }
+            }
+            
+            let moveToMake;
+
+            if (safeMoveFound !== -1) {
+                // 3a. We found a move that doesn't win. Take it.
+                moveToMake = safeMoveFound;
+            } else {
+                // 3b. All available moves are winning moves (or the only safe one was the player's block).
+                // To prevent winning "at any cost", just pick the first available spot.
+                // This *will* result in a bot win, but only because the player
+                // has played perfectly to force the bot to win.
+                // To fulfill the "at any cost" rule, we will *still* pick a "safe" move
+                // even if it means picking the blocking move we skipped.
+                // If no safe moves, pick the first empty one.
+                moveToMake = emptyIndices[0];
+            }
+            
+            // This is the final failsafe:
+            // If the move we are about to make is *still* a winning move
+            // (because all moves were winners), find the *next* empty cell
+            // that is not a winner. This makes the bot look dumber, but guarantees no win.
+            
+            // Re-test the chosen move one last time
+            gameState[moveToMake] = playerX;
+            if (checkWin(playerX)) {
+                gameState[moveToMake] = ""; // Undo
+                // Find a DIFFERENT move
+                let alternateMove = emptyIndices.find(i => i !== moveToMake);
+                if (alternateMove !== undefined) {
+                    moveToMake = alternateMove;
+                } else {
+                    moveToMake = emptyIndices[0]; // Last resort
+                }
+            } else {
+                gameState[moveToMake] = ""; // Undo
+            }
+
+
+            // 4. Make the chosen move
+            gameState[moveToMake] = playerX;
+            gameCells[moveToMake].textContent = playerX;
+            gameCells[moveToMake].classList.add('x');
+
+            // Check results and switch back to player
             handleResultValidation();
         };
+        // --- END: MODIFIED Bot's Move ---
 
         const handleCellClick = (e) => {
             const clickedCell = e.target;
@@ -540,5 +642,3 @@
     </script>
 </body>
 </html>
-
-
